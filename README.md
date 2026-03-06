@@ -74,7 +74,7 @@ Production-ready full-stack football analytics platform:
 │   ├── lib
 │   │   ├── api.js
 │   │   └── dummyData.js
-│   └── public/logo.svg
+│   └── public/logo.png
 └── README.md
 ```
 
