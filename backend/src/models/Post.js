@@ -10,7 +10,8 @@ const postSchema = new mongoose.Schema(
     shots: String,
     possession: String,
     analysis_text: String,
-    charts: [String]
+    charts: [String],
+    imageUrl: String
   },
   { timestamps: true }
 );

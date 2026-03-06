@@ -6,7 +6,9 @@ const predictionSchema = new mongoose.Schema(
     teams: [String],
     win_probability: [Number],
     expected_goals: [Number],
-    confidence: Number
+    confidence: Number,
+    charts: [String],
+    imageUrl: String
   },
   { timestamps: true }
 );

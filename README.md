@@ -1,34 +1,41 @@
 # MDA | Football Analysis
 
-A complete full-stack football analytics platform using **Next.js + TailwindCSS** on the frontend and **Node.js + Express + MongoDB** on the backend.
+Production-ready full-stack football analytics platform:
+- **Frontend:** Next.js (App Router) + TailwindCSS + Framer Motion + Chart.js
+- **Backend:** Node.js + Express + MongoDB (Mongoose)
+- **Auth:** JWT + role-based authorization (`admin`, `editor`, `user`)
 
-## Brand-aligned design
-- Background: `#0B0F14`
-- Accent: `#00FF9C`
-- Typography: Montserrat (headings), Open Sans (body)
-- Style: dark, clean, data-driven dashboard UI inspired by your provided logo.
+## Highlights
+- Dark brand styling aligned to logo identity (`#0B0F14` background, `#00FF9C` accent).
+- Blog + predictions listing pages with backend pagination.
+- Dynamic single pages:
+  - `/blog/[id]` → loads `GET /api/posts/:id`
+  - `/predictions/[id]` → loads `GET /api/predictions/:id`
+- Admin dashboard protection using JWT + role checks.
+- Upload pipeline with Multer and static `/uploads` delivery.
+- Centralized backend error handling and frontend error banners.
 
-> The project includes a neon-green branded logo asset at `frontend/public/logo.svg` that matches the identity style. Replace it with your exact uploaded logo file if needed while keeping the same filename.
-
-## Full folder structure
+## Folder structure
 
 ```text
 .
 ├── backend
 │   ├── .env.example
 │   ├── package.json
-│   ├── scripts
-│   │   └── seed.js
+│   ├── scripts/seed.js
 │   └── src
 │       ├── app.js
 │       ├── config
-│       │   └── db.js
+│       │   ├── db.js
+│       │   └── upload.js
 │       ├── controllers
 │       │   ├── authController.js
 │       │   ├── postController.js
-│       │   └── predictionController.js
+│       │   ├── predictionController.js
+│       │   └── uploadController.js
 │       ├── middleware
-│       │   └── auth.js
+│       │   ├── auth.js
+│       │   └── errorHandler.js
 │       ├── models
 │       │   ├── Post.js
 │       │   ├── Prediction.js
@@ -36,107 +43,85 @@ A complete full-stack football analytics platform using **Next.js + TailwindCSS*
 │       ├── routes
 │       │   ├── authRoutes.js
 │       │   ├── postRoutes.js
-│       │   └── predictionRoutes.js
+│       │   ├── predictionRoutes.js
+│       │   └── uploadRoutes.js
+│       ├── uploads/
+│       ├── utils/asyncHandler.js
 │       └── server.js
 ├── frontend
 │   ├── app
-│   │   ├── admin
-│   │   │   ├── dashboard
-│   │   │   │   └── page.js
-│   │   │   └── login
-│   │   │       └── page.js
-│   │   ├── analysis
-│   │   │   └── page.js
-│   │   ├── blog
-│   │   │   └── page.js
-│   │   ├── data-viz
-│   │   │   └── page.js
-│   │   ├── predictions
-│   │   │   └── page.js
+│   │   ├── admin/login/page.js
+│   │   ├── admin/dashboard/page.js
+│   │   ├── analysis/page.js
+│   │   ├── blog/page.js
+│   │   ├── blog/[id]/page.js
+│   │   ├── predictions/page.js
+│   │   ├── predictions/[id]/page.js
+│   │   ├── data-viz/page.js
 │   │   ├── globals.css
 │   │   ├── layout.js
 │   │   └── page.js
 │   ├── components
 │   │   ├── ChartSection.js
+│   │   ├── ErrorBanner.js
 │   │   ├── Footer.js
 │   │   ├── MatchStatsCard.js
 │   │   ├── Navbar.js
 │   │   ├── PageIntro.js
+│   │   ├── Pagination.js
 │   │   ├── PostCard.js
 │   │   └── PredictionCard.js
 │   ├── lib
+│   │   ├── api.js
 │   │   └── dummyData.js
-│   ├── public
-│   │   └── logo.png
-│   ├── jsconfig.json
-│   ├── next.config.mjs
-│   ├── package.json
-│   ├── postcss.config.js
-│   └── tailwind.config.js
+│   └── public/logo.png
 └── README.md
 ```
-
-## Frontend highlights
-- Home page with hero/logo, featured analysis, latest predictions, recent stats.
-- Analysis page with post + stats cards.
-- Predictions page with probability bars and confidence scores.
-- Data Visualization page with interactive Chart.js graphs.
-- Blog page for long-form posts.
-- Admin login + admin dashboard form for creating analysis posts.
-- Reusable components: `Navbar`, `PostCard`, `MatchStatsCard`, `PredictionCard`, `ChartSection`, `Footer`.
-- Framer Motion intro animation.
 
 ## Backend API
 Base URL: `http://localhost:5000/api`
 
 ### Auth
 - `POST /auth/login`
+- `GET /auth/me` (protected)
 
 ### Posts
-- `GET /posts`
-- `POST /posts` (admin token required)
-- `PUT /posts/:id` (admin token required)
-- `DELETE /posts/:id` (admin token required)
+- `GET /posts?page=1&limit=10`
+- `GET /posts/:id`
+- `POST /posts` (protected: `admin`, `editor`)
+- `PUT /posts/:id` (protected: `admin`, `editor`)
+- `DELETE /posts/:id` (protected: `admin`)
 
 ### Predictions
-- `GET /predictions`
-- `POST /predictions` (admin token required)
-- `PUT /predictions/:id` (admin token required)
-- `DELETE /predictions/:id` (admin token required)
+- `GET /predictions?page=1&limit=10`
+- `GET /predictions/:id`
+- `POST /predictions` (protected: `admin`, `editor`)
+- `PUT /predictions/:id` (protected: `admin`, `editor`)
+- `DELETE /predictions/:id` (protected: `admin`)
 
-## Database collections
-### `Posts`
-- title
-- match
-- teams
-- stats
-- xg
-- shots
-- possession
-- analysis_text
-- charts
+### Uploads
+- `POST /upload` (protected: `admin`, `editor`, multipart `image`)
+- Files are served from `/uploads/<filename>`
 
-### `Predictions`
-- match
-- teams
-- win_probability
-- expected_goals
-- confidence
+## Collections
+### Posts
+- title, match, teams, stats, xg, shots, possession, analysis_text, charts, imageUrl
 
-### `Users`
-- email
-- password
-- role
+### Predictions
+- match, teams, win_probability, expected_goals, confidence, charts, imageUrl
 
-## Dummy data & seed
+### Users
+- email, password, role (`admin` | `editor` | `user`)
+
+## Seed users
 `backend/scripts/seed.js` creates:
-- Admin user: `admin@mda.com` / `admin123`
-- Sample analysis post
-- Sample prediction
+- `admin@mda.com` / `admin123`
+- `editor@mda.com` / `editor123`
+- `user@mda.com` / `user123`
 
 ## Run locally
 
-### 1) Backend
+### Backend
 ```bash
 cd backend
 cp .env.example .env
@@ -145,17 +130,13 @@ npm run seed
 npm run dev
 ```
 
-### 2) Frontend
+### Frontend
 ```bash
 cd frontend
 npm install
-# optional if backend is not at default URL
+# optional if backend URL differs
 # echo "NEXT_PUBLIC_API_URL=http://localhost:5000/api" > .env.local
 npm run dev
 ```
 
 Open: `http://localhost:3000`
-
-## Notes
-- Replace `frontend/public/logo.svg` with your exact provided logo export if you want pixel-perfect branding.
-- Admin actions require JWT in localStorage (`mda_token`) set after login.

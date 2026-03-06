@@ -10,8 +10,15 @@ const seed = async () => {
 
   await Promise.all([User.deleteMany(), Post.deleteMany(), Prediction.deleteMany()]);
 
-  const password = await bcrypt.hash('admin123', 10);
-  await User.create({ email: 'admin@mda.com', password });
+  const adminPassword = await bcrypt.hash('admin123', 10);
+  const editorPassword = await bcrypt.hash('editor123', 10);
+  const userPassword = await bcrypt.hash('user123', 10);
+
+  await User.insertMany([
+    { email: 'admin@mda.com', password: adminPassword, role: 'admin' },
+    { email: 'editor@mda.com', password: editorPassword, role: 'editor' },
+    { email: 'user@mda.com', password: userPassword, role: 'user' }
+  ]);
 
   await Post.insertMany([
     {
@@ -23,7 +30,8 @@ const seed = async () => {
       shots: '14 - 9',
       possession: '56% - 44%',
       analysis_text: 'Arsenal forced six high turnovers in key zones.',
-      charts: ['xg-bar.png']
+      charts: ['xg-bar.png'],
+      imageUrl: '/uploads/sample-analysis.png'
     }
   ]);
 
@@ -33,11 +41,13 @@ const seed = async () => {
       teams: ['Manchester City', 'Chelsea'],
       win_probability: [64, 19, 17],
       expected_goals: [2.1, 1.0],
-      confidence: 82
+      confidence: 82,
+      charts: ['probability-distribution.png'],
+      imageUrl: '/uploads/sample-prediction.png'
     }
   ]);
 
-  console.log('Seed complete: admin@mda.com / admin123');
+  console.log('Seed complete: admin@mda.com/admin123, editor@mda.com/editor123, user@mda.com/user123');
   await mongoose.disconnect();
 };
 

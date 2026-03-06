@@ -1,7 +1,9 @@
 const express = require('express');
-const auth = require('../middleware/auth');
+const upload = require('../config/upload');
+const { protect, authorize } = require('../middleware/auth');
 const {
   getPredictions,
+  getPredictionById,
   createPrediction,
   updatePrediction,
   deletePrediction
@@ -10,8 +12,9 @@ const {
 const router = express.Router();
 
 router.get('/', getPredictions);
-router.post('/', auth, createPrediction);
-router.put('/:id', auth, updatePrediction);
-router.delete('/:id', auth, deletePrediction);
+router.get('/:id', getPredictionById);
+router.post('/', protect, authorize('admin', 'editor'), upload.single('image'), createPrediction);
+router.put('/:id', protect, authorize('admin', 'editor'), upload.single('image'), updatePrediction);
+router.delete('/:id', protect, authorize('admin'), deletePrediction);
 
 module.exports = router;
