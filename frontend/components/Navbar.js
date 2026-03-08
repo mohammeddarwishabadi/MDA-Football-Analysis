@@ -19,14 +19,20 @@ export default function Navbar() {
   const { user, logout } = useAuth();
 
   const links = useMemo(() => {
+    const withPremium = user?.subscription === 'premium' ? [...baseLinks, ['/predictions/advanced', 'Premium']] : baseLinks;
+
     if (user?.role === 'admin') {
-      return [...baseLinks, ['/admin/dashboard', 'Dashboard']];
+      return [...withPremium, ['/admin/dashboard', 'Dashboard']];
     }
-    return [...baseLinks, ['/admin/login', 'Login']];
-  }, [user?.role]);
+
+    if (user) {
+      return withPremium;
+    }
+
+    return [...baseLinks, ['/admin/login', 'Login'], ['/auth/register', 'Register']];
+  }, [user]);
 
   const handleLogout = () => {
-    // Explicitly remove token key as requested.
     localStorage.removeItem('mda_token');
     logout();
     router.push('/');
@@ -49,7 +55,7 @@ export default function Navbar() {
             </Link>
           ))}
 
-          {(user?.role === 'admin') && (
+          {user?.role === 'admin' && (
             <button onClick={handleLogout} className="px-2 py-1 rounded text-slate-200 hover:text-accent border border-white/20">
               Logout
             </button>

@@ -1,6 +1,8 @@
 const express = require('express');
 const upload = require('../config/upload');
-const { protect, adminOnly, requirePremium } = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
+const requireAdmin = require('../middleware/requireAdmin');
+const requirePremium = require('../middleware/requirePremium');
 const {
   getPredictions,
   getPredictionById,
@@ -13,8 +15,6 @@ const { withCache } = require('../services/cacheService');
 const router = express.Router();
 
 router.get('/', withCache('predictions', 60 * 1000), getPredictions);
-router.get('/:id', getPredictionById);
-// SaaS premium-gated example endpoint for advanced predictions payload.
 router.get('/advanced/premium-feed', protect, requirePremium, (_req, res) => {
   res.json({
     feature: 'advanced-predictions',
@@ -22,8 +22,9 @@ router.get('/advanced/premium-feed', protect, requirePremium, (_req, res) => {
     indicators: ['form-adjusted xG', 'fatigue model', 'schedule pressure index']
   });
 });
-router.post('/', protect, adminOnly, upload.single('image'), createPrediction);
-router.put('/:id', protect, adminOnly, upload.single('image'), updatePrediction);
-router.delete('/:id', protect, adminOnly, deletePrediction);
+router.get('/:id', getPredictionById);
+router.post('/', protect, requireAdmin, upload.single('image'), createPrediction);
+router.put('/:id', protect, requireAdmin, upload.single('image'), updatePrediction);
+router.delete('/:id', protect, requireAdmin, deletePrediction);
 
 module.exports = router;

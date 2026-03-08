@@ -7,18 +7,26 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const toPublicUser = (user) => ({
   id: user._id,
-  name: user.name,
+  username: user.username,
+  firstname: user.firstname,
+  lastname: user.lastname,
   email: user.email,
   role: user.role,
   subscription: user.subscription,
   createdAt: user.createdAt
 });
 
-exports.register = asyncHandler(async (req, res) => {
-  const { name, email, password } = req.body;
+const signToken = (user) => jwt.sign(
+  { id: user._id, role: user.role, subscription: user.subscription },
+  process.env.JWT_SECRET,
+  { expiresIn: '1d' }
+);
 
-  if (!name || !email || !password) {
-    return res.status(400).json({ message: 'Name, email and password are required' });
+exports.register = asyncHandler(async (req, res) => {
+  const { username, firstname, lastname, email, password } = req.body;
+
+  if (!username || !firstname || !lastname || !email || !password) {
+    return res.status(400).json({ message: 'Username, firstname, lastname, email and password are required' });
   }
 
   if (!emailRegex.test(email)) {
@@ -29,22 +37,28 @@ exports.register = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: 'Password must be at least 8 characters' });
   }
 
-  const exists = await User.findOne({ email: email.toLowerCase() });
-  if (exists) {
-    return res.status(409).json({ message: 'Email already registered' });
-  }
+  const [emailExists, usernameExists] = await Promise.all([
+    User.findOne({ email: email.toLowerCase() }),
+    User.findOne({ username: username.trim().toLowerCase() })
+  ]);
+
+  if (emailExists) return res.status(409).json({ message: 'Email already registered' });
+  if (usernameExists) return res.status(409).json({ message: 'Username already taken' });
 
   const hash = await bcrypt.hash(password, 12);
 
   const user = await User.create({
-    name: name.trim(),
+    username: username.trim().toLowerCase(),
+    firstname: firstname.trim(),
+    lastname: lastname.trim(),
     email: email.toLowerCase(),
     password: hash,
     role: 'user',
     subscription: 'free'
   });
 
-  res.status(201).json({ user: toPublicUser(user) });
+  const token = signToken(user);
+  return res.status(201).json({ token, user: toPublicUser(user) });
 });
 
 exports.login = asyncHandler(async (req, res) => {
@@ -60,13 +74,10 @@ exports.login = asyncHandler(async (req, res) => {
   const valid = await bcrypt.compare(password, user.password);
   if (!valid) return res.status(401).json({ message: 'Invalid credentials' });
 
-  const token = jwt.sign({ id: user._id, role: user.role, subscription: user.subscription }, process.env.JWT_SECRET, {
-    expiresIn: '1d'
-  });
-
-  res.json({ token, user: toPublicUser(user) });
+  const token = signToken(user);
+  return res.json({ token, user: toPublicUser(user) });
 });
 
 exports.me = asyncHandler(async (req, res) => {
-  res.json({ user: toPublicUser(req.user) });
+  return res.json({ user: toPublicUser(req.user) });
 });

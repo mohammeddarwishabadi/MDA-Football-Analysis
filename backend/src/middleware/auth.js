@@ -19,28 +19,7 @@ const protect = asyncHandler(async (req, res, next) => {
   }
 
   req.user = user;
-  next();
+  return next();
 });
 
-const adminOnly = (req, res, next) => {
-  if (!req.user || req.user.role !== 'admin') {
-    return res.status(403).json({ message: 'Forbidden: admin access only' });
-  }
-  return next();
-};
-
-const requirePremium = (req, res, next) => {
-  if (!req.user || req.user.subscription !== 'premium') {
-    return res.status(403).json({ message: 'Premium subscription required' });
-  }
-  return next();
-};
-
-const authorize = (...roles) => (req, res, next) => {
-  if (!req.user || !roles.includes(req.user.role)) {
-    return res.status(403).json({ message: 'Forbidden: insufficient role' });
-  }
-  return next();
-};
-
-module.exports = { protect, adminOnly, requirePremium, authorize };
+module.exports = { protect };

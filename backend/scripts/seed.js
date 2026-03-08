@@ -16,21 +16,27 @@ const seed = async () => {
 
   const [admin, user1, user2] = await User.insertMany([
     {
-      name: 'MDA Admin',
+      username: 'mda_admin',
+      firstname: 'MDA',
+      lastname: 'Admin',
       email: 'admin@mda.com',
       password: adminPassword,
       role: 'admin',
       subscription: 'premium'
     },
     {
-      name: 'MDA User One',
+      username: 'mda_user1',
+      firstname: 'MDA',
+      lastname: 'UserOne',
       email: 'user1@mda.com',
       password: userPassword,
       role: 'user',
       subscription: 'free'
     },
     {
-      name: 'MDA User Two',
+      username: 'mda_user2',
+      firstname: 'MDA',
+      lastname: 'UserTwo',
       email: 'user2@mda.com',
       password: userPassword,
       role: 'user',

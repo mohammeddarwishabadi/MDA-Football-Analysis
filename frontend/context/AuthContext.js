@@ -19,10 +19,7 @@ export function AuthProvider({ children }) {
     }
 
     try {
-      const payload = await apiRequest('/auth/me', {
-        token: authToken
-      });
-
+      const payload = await apiRequest('/auth/me', { token: authToken });
       setUser(payload.user || null);
       return payload.user || null;
     } catch {
@@ -33,18 +30,32 @@ export function AuthProvider({ children }) {
     }
   }, [token]);
 
+  const applyAuthPayload = useCallback((payload) => {
+    if (payload?.token) {
+      localStorage.setItem('mda_token', payload.token);
+      setToken(payload.token);
+    }
+    setUser(payload?.user || null);
+    return payload?.user || null;
+  }, []);
+
   const login = useCallback(async ({ email, password }) => {
     const payload = await apiRequest('/auth/login', {
       method: 'POST',
       body: { email, password }
     });
 
-    localStorage.setItem('mda_token', payload.token);
-    setToken(payload.token);
-    setUser(payload.user || null);
+    return applyAuthPayload(payload);
+  }, [applyAuthPayload]);
 
-    return payload.user;
-  }, []);
+  const register = useCallback(async (form) => {
+    const payload = await apiRequest('/auth/register', {
+      method: 'POST',
+      body: form
+    });
+
+    return applyAuthPayload(payload);
+  }, [applyAuthPayload]);
 
   const logout = useCallback(() => {
     localStorage.removeItem('mda_token');
@@ -65,8 +76,8 @@ export function AuthProvider({ children }) {
   }, [fetchCurrentUser]);
 
   const value = useMemo(
-    () => ({ user, token, loading, login, logout, fetchCurrentUser }),
-    [user, token, loading, login, logout, fetchCurrentUser]
+    () => ({ user, token, loading, login, register, logout, fetchCurrentUser }),
+    [user, token, loading, login, register, logout, fetchCurrentUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
