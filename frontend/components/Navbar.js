@@ -19,7 +19,7 @@ export default function Navbar() {
   const { user, logout } = useAuth();
 
   const links = useMemo(() => {
-    if (user?.role === 'admin' || user?.role === 'editor') {
+    if (user?.role === 'admin') {
       return [...baseLinks, ['/admin/dashboard', 'Dashboard']];
     }
     return [...baseLinks, ['/admin/login', 'Login']];
@@ -49,7 +49,7 @@ export default function Navbar() {
             </Link>
           ))}
 
-          {(user?.role === 'admin' || user?.role === 'editor') && (
+          {(user?.role === 'admin') && (
             <button onClick={handleLogout} className="px-2 py-1 rounded text-slate-200 hover:text-accent border border-white/20">
               Logout
             </button>

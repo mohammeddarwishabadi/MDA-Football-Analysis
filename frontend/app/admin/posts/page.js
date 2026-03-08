@@ -9,7 +9,7 @@ import { apiRequest } from '@/lib/api';
 
 export default function AdminPostsPage() {
   return (
-    <ProtectedRoute roles={['admin', 'editor']}>
+    <ProtectedRoute roles={['admin']}>
       <PostsManager />
     </ProtectedRoute>
   );

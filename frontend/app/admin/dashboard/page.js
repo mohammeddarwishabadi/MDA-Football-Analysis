@@ -30,7 +30,7 @@ const initialPrediction = {
 
 export default function AdminDashboardPage() {
   return (
-    <ProtectedRoute roles={['admin', 'editor']}>
+    <ProtectedRoute roles={['admin']}>
       <DashboardContent />
     </ProtectedRoute>
   );

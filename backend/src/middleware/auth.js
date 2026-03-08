@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const asyncHandler = require('../utils/asyncHandler');
 
-// Verifies JWT and hydrates req.user from DB to ensure role checks are current.
 const protect = asyncHandler(async (req, res, next) => {
   const token = req.headers.authorization?.startsWith('Bearer ')
     ? req.headers.authorization.split(' ')[1]
@@ -23,12 +22,25 @@ const protect = asyncHandler(async (req, res, next) => {
   next();
 });
 
-// RBAC middleware to allow only specific roles.
+const adminOnly = (req, res, next) => {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Forbidden: admin access only' });
+  }
+  return next();
+};
+
+const requirePremium = (req, res, next) => {
+  if (!req.user || req.user.subscription !== 'premium') {
+    return res.status(403).json({ message: 'Premium subscription required' });
+  }
+  return next();
+};
+
 const authorize = (...roles) => (req, res, next) => {
   if (!req.user || !roles.includes(req.user.role)) {
     return res.status(403).json({ message: 'Forbidden: insufficient role' });
   }
-  next();
+  return next();
 };
 
-module.exports = { protect, authorize };
+module.exports = { protect, adminOnly, requirePremium, authorize };

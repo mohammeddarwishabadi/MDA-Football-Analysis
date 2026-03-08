@@ -22,7 +22,7 @@ const initialForm = {
 
 export default function EditPostPage() {
   return (
-    <ProtectedRoute roles={['admin', 'editor']}>
+    <ProtectedRoute roles={['admin']}>
       <EditPostForm />
     </ProtectedRoute>
   );

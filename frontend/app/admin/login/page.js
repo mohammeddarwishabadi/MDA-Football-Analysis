@@ -20,7 +20,7 @@ export default function LoginPage() {
 
     try {
       const user = await login(form);
-      if (user.role === 'admin' || user.role === 'editor') {
+      if (user.role === 'admin') {
         router.push('/admin/dashboard');
       } else {
         router.push('/');

@@ -10,7 +10,7 @@ import { useAuth } from '@/context/AuthContext';
 
 export default function AdminPredictionsPage() {
   return (
-    <ProtectedRoute roles={['admin', 'editor']}>
+    <ProtectedRoute roles={['admin']}>
       <PredictionsManager />
     </ProtectedRoute>
   );

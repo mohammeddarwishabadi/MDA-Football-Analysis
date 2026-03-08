@@ -11,14 +11,31 @@ const seed = async () => {
 
   await Promise.all([User.deleteMany(), Post.deleteMany(), Prediction.deleteMany(), Comment.deleteMany()]);
 
-  const adminPassword = await bcrypt.hash('admin123', 10);
-  const editorPassword = await bcrypt.hash('editor123', 10);
-  const userPassword = await bcrypt.hash('user123', 10);
+  const adminPassword = await bcrypt.hash('admin12345', 12);
+  const userPassword = await bcrypt.hash('user12345', 12);
 
-  const [admin, editor, user] = await User.insertMany([
-    { email: 'admin@mda.com', password: adminPassword, role: 'admin' },
-    { email: 'editor@mda.com', password: editorPassword, role: 'editor' },
-    { email: 'user@mda.com', password: userPassword, role: 'user' }
+  const [admin, user1, user2] = await User.insertMany([
+    {
+      name: 'MDA Admin',
+      email: 'admin@mda.com',
+      password: adminPassword,
+      role: 'admin',
+      subscription: 'premium'
+    },
+    {
+      name: 'MDA User One',
+      email: 'user1@mda.com',
+      password: userPassword,
+      role: 'user',
+      subscription: 'free'
+    },
+    {
+      name: 'MDA User Two',
+      email: 'user2@mda.com',
+      password: userPassword,
+      role: 'user',
+      subscription: 'premium'
+    }
   ]);
 
   const [post] = await Post.insertMany([
@@ -49,12 +66,18 @@ const seed = async () => {
   ]);
 
   await Comment.create({
-    user: user._id,
+    user: user1._id,
     post: post._id,
     content: 'Great breakdown. The midfield press was the turning point.'
   });
 
-  console.log('Seed complete: admin@mda.com/admin123, editor@mda.com/editor123, user@mda.com/user123');
+  await Comment.create({
+    user: user2._id,
+    post: post._id,
+    content: 'Would love to see the same model applied to away fixtures.'
+  });
+
+  console.log('Seed complete: admin@mda.com/admin12345, user1@mda.com/user12345, user2@mda.com/user12345');
   await mongoose.disconnect();
 };
 

@@ -19,7 +19,7 @@ const initialForm = {
 
 export default function EditPredictionPage() {
   return (
-    <ProtectedRoute roles={['admin', 'editor']}>
+    <ProtectedRoute roles={['admin']}>
       <EditPredictionForm />
     </ProtectedRoute>
   );

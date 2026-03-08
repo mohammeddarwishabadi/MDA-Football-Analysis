@@ -47,6 +47,7 @@ app.use('/uploads', express.static(uploadDir));
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 app.use('/api/auth/login', loginLimiter);
+app.use('/api/auth/register', loginLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/predictions', predictionRoutes);
