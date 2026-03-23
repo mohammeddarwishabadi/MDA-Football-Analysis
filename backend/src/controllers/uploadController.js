@@ -6,7 +6,8 @@ exports.uploadImage = asyncHandler(async (req, res) => {
     return sendError(res, 'No file uploaded', 400);
   }
 
-  const folder = req.uploadFolder ? `${req.uploadFolder}/` : '';
-  const url = `/uploads/${folder}${req.file.filename}`;
-  return sendSuccess(res, { url, filename: req.file.filename }, 'File uploaded', 201);
+  const url = req.file.path;
+  const filename = req.file.filename;
+
+  return sendSuccess(res, { url, filename }, 'File uploaded', 201);
 });
