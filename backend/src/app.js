@@ -37,8 +37,20 @@ const apiLimiter = rateLimit({
   message: { message: 'Rate limit exceeded. Please slow down.' }
 });
 
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+  : [];
+
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    const isReplit = origin.endsWith('.replit.dev') || origin.endsWith('.repl.co') || origin.endsWith('.replit.app');
+    if (isReplit || allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true
+}));
 app.use(express.json({ limit: '1mb' }));
 app.use(mongoSanitize());
 app.use(xssClean());
