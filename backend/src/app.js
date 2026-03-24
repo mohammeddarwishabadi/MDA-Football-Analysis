@@ -12,6 +12,7 @@ const postRoutes = require('./routes/postRoutes');
 const predictionRoutes = require('./routes/predictionRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const matchRoutes = require('./routes/matchRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -65,6 +66,7 @@ app.use('/api/posts', postRoutes);
 app.use('/api/predictions', predictionRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/matches', matchRoutes);
 
 app.use((_req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' });

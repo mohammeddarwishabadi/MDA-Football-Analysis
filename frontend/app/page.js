@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import PostCard from '@/components/PostCard';
 import PredictionCard from '@/components/PredictionCard';
+import MatchStatsCard from '@/components/MatchStatsCard';
 import SkeletonCard from '@/components/SkeletonCard';
 import ErrorBanner from '@/components/ErrorBanner';
 import { apiRequest } from '@/lib/api';
@@ -11,8 +12,11 @@ import { apiRequest } from '@/lib/api';
 export default function HomePage() {
   const [posts, setPosts] = useState([]);
   const [preds, setPreds] = useState([]);
+  const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [matchesLoading, setMatchesLoading] = useState(true);
   const [error, setError] = useState('');
+  const [matchError, setMatchError] = useState('');
 
   useEffect(() => {
     const load = async () => {
@@ -33,6 +37,21 @@ export default function HomePage() {
     load();
   }, []);
 
+  useEffect(() => {
+    const loadMatches = async () => {
+      setMatchesLoading(true);
+      try {
+        const payload = await apiRequest('/matches/today');
+        setMatches((payload.data || []).slice(0, 6));
+      } catch (err) {
+        setMatchError(err.message || 'Could not load today\'s matches');
+      } finally {
+        setMatchesLoading(false);
+      }
+    };
+    loadMatches();
+  }, []);
+
   return (
     <div className="space-y-14">
       <section className="card text-center space-y-5 shadow-glow">
@@ -47,6 +66,21 @@ export default function HomePage() {
       </section>
 
       <ErrorBanner message={error} />
+
+      <section>
+        <h2 className="section-title">Today&apos;s Matches</h2>
+        {matchError && <ErrorBanner message={matchError} />}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {matchesLoading
+            ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={`m-${i}`} />)
+            : matches.length > 0
+              ? matches.map((match) => <MatchStatsCard key={match.id} match={match} />)
+              : !matchError && (
+                  <p className="text-muted col-span-3 text-center py-8">No matches scheduled for today.</p>
+                )
+          }
+        </div>
+      </section>
 
       <section>
         <h2 className="section-title">Latest Analysis</h2>
