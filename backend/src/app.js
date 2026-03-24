@@ -48,7 +48,8 @@ app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
     const isReplit = origin.endsWith('.replit.dev') || origin.endsWith('.repl.co') || origin.endsWith('.replit.app');
-    if (isReplit || allowedOrigins.includes(origin)) return callback(null, true);
+    const isLocalhost = /^https?:\/\/localhost(:\d+)?$/.test(origin) || /^https?:\/\/127\.0\.0\.1(:\d+)?$/.test(origin);
+    if (isReplit || isLocalhost || allowedOrigins.includes(origin)) return callback(null, true);
     callback(new Error('Not allowed by CORS'));
   },
   credentials: true

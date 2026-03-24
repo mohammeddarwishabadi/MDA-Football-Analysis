@@ -1,80 +1,126 @@
 import Image from 'next/image';
 
-const StatusBadge = ({ status }) => {
-  const isLive = ['1H', '2H', 'ET', 'P', 'BT', 'HT'].includes(status?.short);
-  const isFinished = status?.short === 'FT';
+const STATUS_LIVE = new Set(['1H', '2H', 'ET', 'P', 'BT', 'HT']);
+
+function LivePing() {
   return (
-    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-      isLive ? 'bg-accent text-black' : isFinished ? 'bg-white/10 text-muted' : 'bg-white/5 text-muted'
-    }`}>
-      {isLive ? `LIVE ${status.elapsed ?? ''}'` : status?.long ?? 'Scheduled'}
+    <span className="relative flex h-2 w-2">
+      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
+      <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
     </span>
   );
-};
+}
+
+function StatBar({ label, homeVal, awayVal, homeRaw, awayRaw, gold }) {
+  const h = parseFloat(homeRaw) || 0;
+  const a = parseFloat(awayRaw) || 0;
+  const total = h + a || 1;
+  const homePct = Math.round((h / total) * 100);
+  const awayPct = 100 - homePct;
+
+  return (
+    <div className="space-y-1">
+      <div className="flex justify-between text-xs">
+        <span className={gold ? 'text-gold font-semibold' : 'text-accent font-semibold'}>{homeVal ?? '—'}</span>
+        <span className="text-white/40 uppercase tracking-widest text-[10px]">{label}</span>
+        <span className="text-white/70 font-semibold">{awayVal ?? '—'}</span>
+      </div>
+      <div className="stat-bar-track">
+        <div className="flex h-full">
+          <div
+            className={gold ? 'stat-bar-fill-gold' : 'stat-bar-fill-green'}
+            style={{ width: `${homePct}%` }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function MatchStatsCard({ match, stats }) {
-  if (match) {
-    const { teams, goals, status, league } = match;
-    const home = stats?.find(s => s.team === teams.home.name);
-    const away = stats?.find(s => s.team === teams.away.name);
+  if (!match) return null;
 
-    return (
-      <div className="card space-y-4">
-        <div className="flex items-center justify-between text-xs text-muted">
-          <span>{league.name} · {league.round}</span>
-          <StatusBadge status={status} />
-        </div>
+  const { teams, goals, status, league } = match;
+  const isLive = STATUS_LIVE.has(status?.short);
+  const isFinished = status?.short === 'FT';
+  const home = stats?.find(s => s.team === teams.home.name);
+  const away = stats?.find(s => s.team === teams.away.name);
 
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex flex-col items-center gap-1 flex-1 text-center">
-            {teams.home.logo && (
-              <Image src={teams.home.logo} alt={teams.home.name} width={36} height={36} unoptimized />
-            )}
-            <span className="text-sm font-semibold">{teams.home.name}</span>
-          </div>
-
-          <div className="text-3xl font-heading font-bold tracking-widest text-accent">
-            {goals.home ?? '-'} – {goals.away ?? '-'}
-          </div>
-
-          <div className="flex flex-col items-center gap-1 flex-1 text-center">
-            {teams.away.logo && (
-              <Image src={teams.away.logo} alt={teams.away.name} width={36} height={36} unoptimized />
-            )}
-            <span className="text-sm font-semibold">{teams.away.name}</span>
-          </div>
-        </div>
-
-        {home && away && (
-          <div className="text-xs text-muted grid grid-cols-3 gap-2 pt-2 border-t border-white/10">
-            <div className="text-center">
-              <div className="font-semibold text-white">{home.shots ?? '-'}</div>
-              <div>Shots</div>
-            </div>
-            <div className="text-center">
-              <div className="font-semibold text-white">{home.possession ?? '-'}</div>
-              <div>Poss (H)</div>
-            </div>
-            <div className="text-center">
-              <div className="font-semibold text-white">{away.shots ?? '-'}</div>
-              <div>Shots (A)</div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  const teams = match?.teams ? [match.teams.home.name, match.teams.away.name] : (stats?.teams ?? ['Team A', 'Team B']);
-  const s = stats?.stats ?? {};
   return (
-    <div className="card">
-      <h3 className="font-heading text-xl font-bold mb-4">{teams[0]} vs {teams[1]}</h3>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
-        <div className="p-3 bg-black/20 rounded">xG: {s.xG ?? `${s.xgHome ?? '-'} – ${s.xgAway ?? '-'}`}</div>
-        <div className="p-3 bg-black/20 rounded">Shots: {s.shots ?? `${s.shotsHome ?? '-'} – ${s.shotsAway ?? '-'}`}</div>
-        <div className="p-3 bg-black/20 rounded">Possession: {s.possession ?? `${s.possessionHome ?? '-'} – ${s.possessionAway ?? '-'}`}</div>
+    <div className="card-tactical flex flex-col gap-4 p-5">
+      {/* Header — league + status */}
+      <div className="flex items-center justify-between text-[11px] uppercase tracking-widest">
+        <span className="text-white/40 truncate">{league.country} · {league.name}</span>
+        <span className={`flex items-center gap-1.5 font-bold ${isLive ? 'text-accent' : isFinished ? 'text-white/40' : 'text-white/25'}`}>
+          {isLive && <LivePing />}
+          {isLive ? `${status.elapsed ?? ''}'` : isFinished ? 'FT' : status?.long ?? 'SCH'}
+        </span>
       </div>
+
+      {/* Score board */}
+      <div className="flex items-center justify-between gap-3">
+        <TeamBlock team={teams.home} />
+
+        <div className="flex flex-col items-center shrink-0">
+          <div
+            className="font-heading text-4xl font-black tracking-widest leading-none"
+            style={{ color: '#F4D03F', textShadow: '0 0 16px rgba(244,208,63,0.5)' }}
+          >
+            {goals.home ?? '-'}&nbsp;–&nbsp;{goals.away ?? '-'}
+          </div>
+          {isLive && (
+            <span className="mt-1 text-[10px] text-accent/70 uppercase tracking-widest">Live</span>
+          )}
+        </div>
+
+        <TeamBlock team={teams.away} right />
+      </div>
+
+      {/* Round label */}
+      <p className="text-center text-[10px] text-white/25 uppercase tracking-widest -mt-1">
+        {league.round}
+      </p>
+
+      {/* Stat bars (only when stats available) */}
+      {home && away && (
+        <div className="border-t border-white/5 pt-3 space-y-3">
+          <StatBar
+            label="Possession"
+            homeVal={home.possession}
+            awayVal={away.possession}
+            homeRaw={parseFloat(home.possession)}
+            awayRaw={parseFloat(away.possession)}
+          />
+          <StatBar
+            label="Shots"
+            homeVal={home.shots}
+            awayVal={away.shots}
+            homeRaw={home.shots}
+            awayRaw={away.shots}
+            gold
+          />
+          <StatBar
+            label="On Target"
+            homeVal={home.shotsOnTarget}
+            awayVal={away.shotsOnTarget}
+            homeRaw={home.shotsOnTarget}
+            awayRaw={away.shotsOnTarget}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TeamBlock({ team, right }) {
+  return (
+    <div className={`flex flex-col items-center gap-1.5 flex-1 ${right ? 'items-end' : 'items-start'}`}>
+      {team.logo && (
+        <div className="relative w-9 h-9">
+          <Image src={team.logo} alt={team.name} fill className="object-contain" unoptimized />
+        </div>
+      )}
+      <span className="text-xs font-semibold text-white/80 text-center leading-tight">{team.name}</span>
     </div>
   );
 }
