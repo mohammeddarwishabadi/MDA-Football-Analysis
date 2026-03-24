@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
 const STATUS_LIVE = new Set(['1H', '2H', 'ET', 'P', 'BT', 'HT']);
 
@@ -16,7 +17,6 @@ function StatBar({ label, homeVal, awayVal, homeRaw, awayRaw, gold }) {
   const a = parseFloat(awayRaw) || 0;
   const total = h + a || 1;
   const homePct = Math.round((h / total) * 100);
-  const awayPct = 100 - homePct;
 
   return (
     <div className="space-y-1">
@@ -26,12 +26,7 @@ function StatBar({ label, homeVal, awayVal, homeRaw, awayRaw, gold }) {
         <span className="text-white/70 font-semibold">{awayVal ?? '—'}</span>
       </div>
       <div className="stat-bar-track">
-        <div className="flex h-full">
-          <div
-            className={gold ? 'stat-bar-fill-gold' : 'stat-bar-fill-green'}
-            style={{ width: `${homePct}%` }}
-          />
-        </div>
+        <div className={gold ? 'stat-bar-fill-gold' : 'stat-bar-fill-green'} style={{ width: `${homePct}%` }} />
       </div>
     </div>
   );
@@ -46,9 +41,9 @@ export default function MatchStatsCard({ match, stats }) {
   const home = stats?.find(s => s.team === teams.home.name);
   const away = stats?.find(s => s.team === teams.away.name);
 
-  return (
-    <div className="card-tactical flex flex-col gap-4 p-5">
-      {/* Header — league + status */}
+  const cardContent = (
+    <div className="card-tactical flex flex-col gap-4 p-5 h-full">
+      {/* Header */}
       <div className="flex items-center justify-between text-[11px] uppercase tracking-widest">
         <span className="text-white/40 truncate">{league.country} · {league.name}</span>
         <span className={`flex items-center gap-1.5 font-bold ${isLive ? 'text-accent' : isFinished ? 'text-white/40' : 'text-white/25'}`}>
@@ -57,58 +52,43 @@ export default function MatchStatsCard({ match, stats }) {
         </span>
       </div>
 
-      {/* Score board */}
+      {/* Score */}
       <div className="flex items-center justify-between gap-3">
         <TeamBlock team={teams.home} />
-
         <div className="flex flex-col items-center shrink-0">
-          <div
-            className="font-heading text-4xl font-black tracking-widest leading-none"
-            style={{ color: '#F4D03F', textShadow: '0 0 16px rgba(244,208,63,0.5)' }}
-          >
+          <div className="font-heading text-4xl font-black tracking-widest leading-none"
+            style={{ color: '#F4D03F', textShadow: '0 0 16px rgba(244,208,63,0.5)' }}>
             {goals.home ?? '-'}&nbsp;–&nbsp;{goals.away ?? '-'}
           </div>
-          {isLive && (
-            <span className="mt-1 text-[10px] text-accent/70 uppercase tracking-widest">Live</span>
-          )}
+          {isLive && <span className="mt-1 text-[10px] text-accent/70 uppercase tracking-widest">Live</span>}
         </div>
-
         <TeamBlock team={teams.away} right />
       </div>
 
-      {/* Round label */}
-      <p className="text-center text-[10px] text-white/25 uppercase tracking-widest -mt-1">
-        {league.round}
-      </p>
+      <p className="text-center text-[10px] text-white/25 uppercase tracking-widest -mt-1">{league.round}</p>
 
-      {/* Stat bars (only when stats available) */}
+      {/* Stat bars */}
       {home && away && (
         <div className="border-t border-white/5 pt-3 space-y-3">
-          <StatBar
-            label="Possession"
-            homeVal={home.possession}
-            awayVal={away.possession}
-            homeRaw={parseFloat(home.possession)}
-            awayRaw={parseFloat(away.possession)}
-          />
-          <StatBar
-            label="Shots"
-            homeVal={home.shots}
-            awayVal={away.shots}
-            homeRaw={home.shots}
-            awayRaw={away.shots}
-            gold
-          />
-          <StatBar
-            label="On Target"
-            homeVal={home.shotsOnTarget}
-            awayVal={away.shotsOnTarget}
-            homeRaw={home.shotsOnTarget}
-            awayRaw={away.shotsOnTarget}
-          />
+          <StatBar label="Possession" homeVal={home.possession} awayVal={away.possession} homeRaw={parseFloat(home.possession)} awayRaw={parseFloat(away.possession)} />
+          <StatBar label="Shots" homeVal={home.shots} awayVal={away.shots} homeRaw={home.shots} awayRaw={away.shots} gold />
+          <StatBar label="On Target" homeVal={home.shotsOnTarget} awayVal={away.shotsOnTarget} homeRaw={home.shotsOnTarget} awayRaw={away.shotsOnTarget} />
         </div>
       )}
+
+      {/* Deep stats link */}
+      <div className="mt-auto pt-2 border-t border-white/5 text-center">
+        <span className="text-[10px] uppercase tracking-widest" style={{ color: 'rgba(0,255,65,0.4)' }}>
+          Tap for match centre →
+        </span>
+      </div>
     </div>
+  );
+
+  return (
+    <Link href={`/match/${match.id}`} className="block h-full hover:opacity-90 transition-opacity">
+      {cardContent}
+    </Link>
   );
 }
 

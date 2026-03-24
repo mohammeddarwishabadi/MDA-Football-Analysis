@@ -1,0 +1,28 @@
+"Listen carefully. We need to do a massive Frontend UI/UX and routing overhaul to transform this project into a premium Sports Analytics Portal. Execute the following 5 major tasks in one go, using our dark tactical theme (#121212 bg, #00FF41 neon green, #F4D03F gold):
+
+Task 1: The Epic Homepage (app/page.js)
+
+Create a Hero Section at the very top: Fetch the most recent post from the DB and display it with a large background image, a dark gradient overlay, and a massive glowing title.
+Below the Hero, convert the Today's Matches section into a sleek, horizontal scrollable row (flex-row, overflow-x-auto) of MatchStatsCards.
+Below that, create a 'Latest Analysis' CSS Grid (3 columns on desktop) mapping the rest of the posts using a redesigned, premium PostCard.
+Task 2: Dynamic Match Center (app/match/[id]/page.js)
+
+Create a new dynamic route for individual matches.
+When a user clicks a MatchStatsCard, it should <Link> to this page.
+This page should fetch the specific match's deep stats from our backend API and display them in a detailed, comparative layout (Home vs Away bars) along with the live score.
+Task 3: Categorized Analysis Hub (app/analysis/page.js)
+
+Refactor the analysis/blog page to include interactive Category Tabs (e.g., 'All', 'Tactical Board', 'Post-Match', 'Scouting').
+Add a sleek search bar input at the top to filter posts by title or team name.
+Task 4: Gamified Predictions UI (app/predictions/page.js)
+
+Overhaul the predictions page. Create two sections:
+'Upcoming Clashes': Cards where users can input their score predictions (e.g., [ 0 ] - [ 0 ]).
+'Top Analysts Leaderboard': A beautiful table showing top users and their points. (Use dummy data for the leaderboard UI for now if the backend logic isn't fully ready).
+Task 5: Component & Routing Polish
+
+Ensure ALL navigation links in Navbar.js, Footer.js, and within cards (PostCard, MatchStatsCard) are using Next.js <Link> and pointing to the correct routes.
+Make sure the PostCard component looks like an editorial magazine card with an image thumbnail, title, date, and a 'Read More' glowing button.
+Please update all necessary files to execute this architectural upgrade."
+
+⚠️

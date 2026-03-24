@@ -29,49 +29,37 @@ const normalisedMatch = (fixture) => ({
 });
 
 exports.getTodayMatches = asyncHandler(async (req, res) => {
-  if (!process.env.API_FOOTBALL_KEY) {
-    return sendError(res, 'API_FOOTBALL_KEY is not configured', 503);
-  }
-
+  if (!process.env.API_FOOTBALL_KEY) return sendError(res, 'API_FOOTBALL_KEY is not configured', 503);
   const today = new Date().toISOString().slice(0, 10);
   const { data } = await apiFootball.get('/fixtures', { params: { date: today } });
-
-  if (!data || !Array.isArray(data.response)) {
-    return sendError(res, 'Unexpected response from football API', 502);
-  }
-
+  if (!data || !Array.isArray(data.response)) return sendError(res, 'Unexpected response from football API', 502);
   const matches = data.response.map(normalisedMatch);
   return sendSuccess(res, matches, `${matches.length} matches found for ${today}`);
 });
 
 exports.getLiveMatches = asyncHandler(async (req, res) => {
-  if (!process.env.API_FOOTBALL_KEY) {
-    return sendError(res, 'API_FOOTBALL_KEY is not configured', 503);
-  }
-
+  if (!process.env.API_FOOTBALL_KEY) return sendError(res, 'API_FOOTBALL_KEY is not configured', 503);
   const { data } = await apiFootball.get('/fixtures', { params: { live: 'all' } });
-
-  if (!data || !Array.isArray(data.response)) {
-    return sendError(res, 'Unexpected response from football API', 502);
-  }
-
+  if (!data || !Array.isArray(data.response)) return sendError(res, 'Unexpected response from football API', 502);
   const matches = data.response.map(normalisedMatch);
   return sendSuccess(res, matches, `${matches.length} live matches`);
 });
 
-exports.getMatchStats = asyncHandler(async (req, res) => {
-  if (!process.env.API_FOOTBALL_KEY) {
-    return sendError(res, 'API_FOOTBALL_KEY is not configured', 503);
-  }
-
+exports.getFixtureById = asyncHandler(async (req, res) => {
+  if (!process.env.API_FOOTBALL_KEY) return sendError(res, 'API_FOOTBALL_KEY is not configured', 503);
   const { fixtureId } = req.params;
-  const { data } = await apiFootball.get('/fixtures/statistics', {
-    params: { fixture: fixtureId }
-  });
-
-  if (!data || !Array.isArray(data.response)) {
-    return sendError(res, 'Unexpected response from football API', 502);
+  const { data } = await apiFootball.get('/fixtures', { params: { id: fixtureId } });
+  if (!data || !Array.isArray(data.response) || data.response.length === 0) {
+    return sendError(res, 'Fixture not found', 404);
   }
+  return sendSuccess(res, normalisedMatch(data.response[0]), 'Fixture data');
+});
+
+exports.getMatchStats = asyncHandler(async (req, res) => {
+  if (!process.env.API_FOOTBALL_KEY) return sendError(res, 'API_FOOTBALL_KEY is not configured', 503);
+  const { fixtureId } = req.params;
+  const { data } = await apiFootball.get('/fixtures/statistics', { params: { fixture: fixtureId } });
+  if (!data || !Array.isArray(data.response)) return sendError(res, 'Unexpected response from football API', 502);
 
   const extract = (teamStats, key) => {
     const stat = teamStats.statistics.find((s) => s.type === key);
